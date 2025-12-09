@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR Oluştur ve Özelleştir</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+<header class="border-b border-slate-800">
+  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <h1 class="text-xl font-bold tracking-tight">QR Oluştur</h1>
+    <nav class="space-x-2 text-sm">
+      <a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-800">Dashboard</a>
+      <a href="create.html" class="px-3 py-2 rounded-md bg-slate-800">QR Oluştur</a>
+      <a href="list.html" class="px-3 py-2 rounded-md hover:bg-slate-800">QR Listesi</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-1">
+  <div class="max-w-5xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-8">
+
+    <!-- Form -->
+    <section class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-4">
+      <h2 class="text-lg font-semibold mb-2">QR Ayarları</h2>
+
+      <!-- Metin / URL -->
+      <div class="space-y-1">
+        <label class="text-sm text-slate-300">Metin veya URL</label>
+        <input id="qrText"
+               class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+               placeholder="https://ornek.com veya herhangi bir metin" />
+      </div>
+
+      <!-- Boyut -->
+      <div class="space-y-1">
+        <label class="text-sm text-slate-300 flex justify-between">
+          <span>Boyut</span>
+          <span id="sizeLabel" class="text-xs text-slate-400">256 px</span>
+        </label>
+        <input id="qrSize" type="range" min="128" max="512" step="32"
+               class="w-full"
+               value="256" />
+      </div>
+
+      <!-- Renkler -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1">
+          <label class="text-sm text-slate-300">Ön Plan (Koyu)</label>
+          <input id="colorDark" type="color"
+                 class="w-full h-10 rounded bg-slate-900 border border-slate-700"
+                 value="#000000" />
+        </div>
+        <div class="space-y-1">
+          <label class="text-sm text-slate-300">Arka Plan (Açık)</label>
+          <input id="colorLight" type="color"
+                 class="w-full h-10 rounded bg-slate-900 border border-slate-700"
+                 value="#ffffff" />
+        </div>
+      </div>
+
+      <!-- Logo -->
+      <div class="space-y-1">
+        <label class="text-sm text-slate-300 flex justify-between items-center">
+          <span>Logo (Opsiyonel)</span>
+          <span class="text-[11px] text-slate-400">PNG/JPG, kare logo tercih edilir</span>
+        </label>
+        <input id="logoInput" type="file" accept="image/*"
+               class="text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3
+                      file:rounded-full file:border-0 file:text-xs
+                      file:font-medium file:bg-emerald-500 file:text-slate-900
+                      hover:file:bg-emerald-400" />
+      </div>
+
+      <!-- Butonlar -->
+      <div class="flex gap-2 pt-2">
+        <button id="generateBtn"
+                class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-lg bg-emerald-500 text-slate-900 font-semibold hover:bg-emerald-400">
+          QR Oluştur
+        </button>
+        <button id="saveBtn"
+                class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-lg border border-slate-600 text-slate-200 hover:bg-slate-800 disabled:opacity-40"
+                disabled>
+          Firebase'e Kaydet
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400 pt-1">
+        Önce QR’yi oluştur, sonra Firebase’e kaydedebilirsin.
+      </p>
+    </section>
+
+    <!-- Önizleme -->
+    <section class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 flex flex-col items-center justify-center">
+      <h2 class="text-lg font-semibold mb-4 self-start">Önizleme</h2>
+
+      <div id="qrcode"
+           class="bg-slate-900/80 rounded-xl p-4 flex items-center justify-center min-h-[260px] min-w-[260px]">
+        <span class="text-sm text-slate-500 text-center">
+          QR kod oluşturmak için sol taraftan bilgileri gir ve "QR Oluştur" butonuna bas.
+        </span>
+      </div>
+
+      <p id="previewText" class="mt-4 text-xs text-slate-400 break-all text-center"></p>
+    </section>
+
+  </div>
+</main>
+
+<!-- QR kütüphanesi -->
+<script src="assets/js/qrcode.min.js"></script>
+
+<!-- Uygulama scripti -->
+<script type="module">
+import { uploadQR } from "./assets/js/qr.js";
+
+let logoDataURL = null;
+let hasLogo = false;
+
+// DOM elemanları
+const qrTextInput     = document.getElementById("qrText");
+const sizeInput       = document.getElementById("qrSize");
+const sizeLabel       = document.getElementById("sizeLabel");
+const colorDarkInput  = document.getElementById("colorDark");
+const colorLightInput = document.getElementById("colorLight");
+const logoInput       = document.getElementById("logoInput");
+const generateBtn     = document.getElementById("generateBtn");
+const saveBtn         = document.getElementById("saveBtn");
+const previewText     = document.getElementById("previewText");
+const qrContainer     = document.getElementById("qrcode");
+
+sizeInput.addEventListener("input", () => {
+  sizeLabel.textContent = sizeInput.value + " px";
+});
+
+// Logo yükleme
+logoInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) {
+    logoDataURL = null;
+    hasLogo = false;
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    logoDataURL = event.target.result;
+    hasLogo = true;
+  };
+  reader.readAsDataURL(file);
+});
+
+// QR oluşturma
+generateBtn.addEventListener("click", () => {
+  const text = qrTextInput.value.trim();
+  const size = parseInt(sizeInput.value, 10);
+  const colorDark = colorDarkInput.value;
+  const colorLight = colorLightInput.value;
+
+  if (!text) {
+    alert("Lütfen metin veya URL gir.");
+    return;
+  }
+
+  previewText.textContent = text;
+  qrContainer.innerHTML = "";
+
+  const qrCode = new QRCode(qrContainer, {
+    text,
+    width: size,
+    height: size,
+    colorDark,
+    colorLight,
+    correctLevel: QRCode.CorrectLevel.H,
+  });
+
+  setTimeout(() => {
+    if (!logoDataURL) return;
+    const canvas = qrContainer.querySelector("canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.src = logoDataURL;
+    img.onload = () => {
+      const logoSize = size * 0.25;
+      const x = (canvas.width - logoSize) / 2;
+      const y = (canvas.height - logoSize) / 2;
+
+      ctx.save();
+      const radius = logoSize * 0.2;
+      roundRect(ctx, x, y, logoSize, logoSize, radius);
+      ctx.clip();
+      ctx.drawImage(img, x, y, logoSize, logoSize);
+      ctx.restore();
+    };
+  }, 100);
+
+  saveBtn.disabled = false;
+});
+
+// Firebase'e kaydet
+saveBtn.addEventListener("click", async () => {
+  const text = qrTextInput.value.trim();
+  if (!text) {
+    alert("Önce geçerli bir metin/URL gir.");
+    return;
+  }
+  const size = parseInt(sizeInput.value, 10);
+  const colorDark = colorDarkInput.value;
+  const colorLight = colorLightInput.value;
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Kaydediliyor...";
+
+  try {
+    await uploadQR({ text, size, colorDark, colorLight, hasLogo });
+  } catch (err) {
+    console.error(err);
+    alert("Kaydederken bir hata oluştu.");
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Firebase'e Kaydet";
+  }
+});
+
+// Logo için yuvarlatılmış köşe
+function roundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+</script>
+
+</body>
+</html>
