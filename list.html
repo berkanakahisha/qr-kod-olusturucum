@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR Listesi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+<header class="border-b border-slate-800">
+  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <h1 class="text-xl font-bold tracking-tight">QR Listesi</h1>
+    <nav class="space-x-2 text-sm">
+      <a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-800">Dashboard</a>
+      <a href="create.html" class="px-3 py-2 rounded-md hover:bg-slate-800">QR Oluştur</a>
+      <a href="list.html" class="px-3 py-2 rounded-md bg-slate-800">QR Listesi</a>
+    </nav>
+  </div>
+</header>
+
+<main class="flex-1">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <h2 class="text-lg font-semibold mb-4">Kaydedilmiş QR Kodlar</h2>
+
+    <div id="emptyState"
+         class="hidden bg-slate-800/60 border border-dashed border-slate-600 rounded-2xl p-8 text-center text-sm text-slate-400">
+      Henüz hiç QR kaydedilmemiş.
+      <a href="create.html" class="text-emerald-400 underline">Hemen bir tane oluştur.</a>
+    </div>
+
+    <div id="grid" class="grid md:grid-cols-3 gap-4"></div>
+  </div>
+</main>
+
+<script type="module">
+import { getAllQR, deleteQR } from "./assets/js/firestore.js";
+
+const grid = document.getElementById("grid");
+const emptyState = document.getElementById("emptyState");
+
+async function load() {
+  const list = await getAllQR();
+
+  if (!list.length) {
+    emptyState.classList.remove("hidden");
+    return;
+  }
+
+  list.forEach((item) => {
+    const card = document.createElement("div");
+    card.className =
+      "bg-slate-800/70 border border-slate-700 rounded-xl p-3 flex flex-col";
+
+    const label = document.createElement("p");
+    label.className =
+      "text-xs text-slate-400 mb-2 line-clamp-2 break-all";
+    label.textContent = item.text;
+    card.appendChild(label);
+
+    const img = document.createElement("img");
+    img.src = item.qr;
+    img.alt = "QR";
+    img.className = "rounded-lg bg-slate-900 mx-auto";
+    card.appendChild(img);
+
+    const meta = document.createElement("div");
+    meta.className =
+      "mt-2 flex items-center justify-between text-[11px] text-slate-400";
+    meta.innerHTML = `
+      <span>${item.size || 256}px</span>
+      <span>${item.hasLogo ? "Logo: Var" : "Logo: Yok"}</span>
+    `;
+    card.appendChild(meta);
+
+    const btn = document.createElement("button");
+    btn.textContent = "Sil";
+    btn.className =
+      "mt-2 w-full text-xs px-3 py-1.5 rounded-md border border-red-500/60 text-red-300 hover:bg-red-500/10";
+    btn.onclick = async () => {
+      if (confirm("Bu QR kaydını silmek istediğine emin misin?")) {
+        await deleteQR(item.id);
+        location.reload();
+      }
+    };
+    card.appendChild(btn);
+
+    grid.appendChild(card);
+  });
+}
+
+load();
+</script>
+
+</body>
+</html>
