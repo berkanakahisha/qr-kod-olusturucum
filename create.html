@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>QR Oluştur – Kartvizit Tarzı</title>
+  <title>QR Oluştur – Kartvizit QR Sistemi</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -20,102 +20,86 @@
   </div>
 </header>
 
-<!-- MAIN -->
 <main class="flex-1 py-10">
   <div class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-10">
 
-    <!-- SOL TARAF – FORM -->
+    <!-- SOL TARAF -->
     <section class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-6">
 
       <h2 class="text-lg font-semibold">Bilgileri Doldur</h2>
       <p class="text-xs text-slate-400">
-        Bütün alanlar opsiyoneldir, doldurduğun her şey QR içine
-        <span class="font-semibold text-emerald-400">kartvizit formatında</span> yazılacak.
+        Doldurduğun alanlar QR içine değil, Firestore'a kaydedilir.  
+        QR içinde yalnızca <b>kart ID bağlantısı</b> bulunur.
       </p>
 
-      <!-- AD / BAŞLIK -->
+      <!-- AD -->
       <div class="space-y-1">
         <label class="text-sm text-slate-300">Ad / Başlık</label>
         <input id="inputName"
-               class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-               placeholder="Örn: Berkan Akahışa" />
+               class="input"
+               placeholder="Örn: Berkan Akahisha" />
       </div>
 
       <!-- METİN -->
       <div class="space-y-1">
         <label class="text-sm text-slate-300">Metin</label>
-        <textarea id="inputText"
-                  class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  rows="2"
-                  placeholder="Kısa açıklama, slogan, adres vb."></textarea>
+        <textarea id="inputText" class="input" rows="2"
+                  placeholder="Açıklama, unvan, slogan vb."></textarea>
       </div>
 
-      <!-- URL -->
+      <!-- WEB SİTESİ -->
       <div class="space-y-1">
         <label class="text-sm text-slate-300">Web Sitesi</label>
-        <input id="inputUrl"
-               class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-               placeholder="https://siteadresin.com" />
+        <input id="inputUrl" class="input" placeholder="https://adres.com" />
       </div>
 
       <!-- TELEFON -->
       <div class="space-y-1">
         <label class="text-sm text-slate-300">Telefon Numarası</label>
-        <input id="inputPhone"
-               class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-               placeholder="+90 5XX XXX XX XX" />
+        <input id="inputPhone" class="input" placeholder="+90 5XX XXX XX XX" />
       </div>
 
       <!-- SOSYAL MEDYA -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div class="space-y-1">
+        <div>
           <label class="text-xs text-slate-300">Instagram</label>
-          <input id="inputInsta"
-                 class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                 placeholder="kullaniciadi" />
+          <input id="inputInsta" class="input" placeholder="kullaniciadi" />
         </div>
-        <div class="space-y-1">
+        <div>
           <label class="text-xs text-slate-300">Facebook</label>
-          <input id="inputFacebook"
-                 class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                 placeholder="profil veya sayfa URL" />
+          <input id="inputFacebook" class="input" placeholder="profil URL" />
         </div>
-        <div class="space-y-1">
+        <div>
           <label class="text-xs text-slate-300">Twitter (X)</label>
-          <input id="inputTwitter"
-                 class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                 placeholder="@kullaniciadi" />
+          <input id="inputTwitter" class="input" placeholder="@kullanici" />
         </div>
       </div>
-
       <!-- NOT ALANI -->
       <div class="space-y-1">
         <label class="text-sm text-slate-300">Not</label>
-        <textarea id="note"
-                  class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  rows="2"
-                  placeholder="Ek bilgi, özel not vb."></textarea>
+        <textarea id="note" class="input" rows="2"
+                  placeholder="Ek bilgi, not vb."></textarea>
       </div>
 
-      <!-- ÖZELLEŞTİRME -->
+      <!-- ÖZELLEŞTİRME BÖLÜMÜ -->
       <div class="border-t border-slate-700 pt-4 space-y-4">
         <h3 class="text-sm font-semibold text-slate-200">QR Görünümü</h3>
 
         <div>
           <label class="text-sm">Boyut: <span id="sizeLabel">256</span> px</label>
-          <input id="qrSize" type="range" min="128" max="512" step="32" value="256" class="w-full" />
+          <input id="qrSize" type="range" min="128" max="512" step="32" value="256" class="w-full">
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="text-sm">Ön Plan (Koyu)</label>
             <input id="colorDark" type="color" value="#000000"
-                   class="w-full h-10 rounded bg-slate-900 border border-slate-700" />
+                   class="w-full h-10 rounded bg-slate-900 border border-slate-700">
           </div>
           <div>
             <label class="text-sm">Arka Plan (Açık)</label>
             <input id="colorLight" type="color" value="#ffffff"
-                   class="w-full h-10 rounded bg-slate-900 border border-slate-700" />
+                   class="w-full h-10 rounded bg-slate-900 border border-slate-700">
           </div>
         </div>
 
@@ -125,7 +109,7 @@
                  class="mt-1 text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3
                         file:rounded-full file:border-0 file:text-xs
                         file:font-medium file:bg-emerald-500 file:text-slate-900
-                        hover:file:bg-emerald-400" />
+                        hover:file:bg-emerald-400">
         </div>
       </div>
 
@@ -145,30 +129,33 @@
 
     </section>
 
-    <!-- SAĞ TARAF – ÖNİZLEME -->
+    <!-- SAĞ TARAF — ÖNİZLEME -->
     <section class="bg-slate-800/40 border border-slate-700 rounded-2xl p-6 flex flex-col items-center">
       <h2 class="text-lg font-semibold mb-4 self-start">Önizleme</h2>
 
       <div id="qrcode"
            class="bg-slate-900/80 rounded-xl p-4 flex items-center justify-center min-h-[260px] min-w-[260px]">
         <span class="text-sm text-slate-500 text-center">
-          Alanları doldurun ve "QR Oluştur" butonuna basın.
+          Bilgileri doldurup "QR Oluştur" butonuna tıklayın.
         </span>
       </div>
 
-      <p id="previewText" class="mt-4 text-xs text-slate-400 whitespace-pre-line break-all text-center"></p>
+      <p id="previewText"
+         class="mt-4 text-xs text-slate-400 whitespace-pre-line break-all text-center"></p>
     </section>
 
   </div>
 </main>
 
-<!-- QR KÜTÜPHANESİ -->
+<!-- KÜTÜPHANE -->
 <script src="assets/js/qrcode.min.js"></script>
 
 <!-- UYGULAMA KODU -->
 <script type="module">
-import { uploadQR } from "./assets/js/qr.js";
-
+import { saveQRRecord } from "./assets/js/firestore.js";
+import { storage } from "./assets/js/firebase.js";
+import { ref, uploadString, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 // INPUT REFERANSLARI
 const nameInput     = document.getElementById("inputName");
 const textInput     = document.getElementById("inputText");
@@ -179,7 +166,7 @@ const facebookInput = document.getElementById("inputFacebook");
 const twitterInput  = document.getElementById("inputTwitter");
 const noteInput     = document.getElementById("note");
 
-// ÖZELLEŞTİRME ELEMANLARI
+// ÖZELLEŞTİRME
 const sizeInput       = document.getElementById("qrSize");
 const sizeLabel       = document.getElementById("sizeLabel");
 const colorDarkInput  = document.getElementById("colorDark");
@@ -195,12 +182,12 @@ const previewText = document.getElementById("previewText");
 let logoDataURL = null;
 let hasLogo = false;
 
-// Boyut label
+// Boyut Güncelleme
 sizeInput.addEventListener("input", () => {
   sizeLabel.textContent = sizeInput.value;
 });
 
-// Logo yükleme
+// Logo Yükleme
 logoInput.addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) {
@@ -216,53 +203,64 @@ logoInput.addEventListener("change", (e) => {
   reader.readAsDataURL(file);
 });
 
-// Kartvizit tarzı metni oluştur
-function buildCardText() {
-  const lines = [];
-
-  const name  = nameInput.value.trim();
-  const text  = textInput.value.trim();
-  const url   = urlInput.value.trim();
-  const phone = phoneInput.value.trim();
-  const insta = instaInput.value.trim();
-  const fb    = facebookInput.value.trim();
-  const tw    = twitterInput.value.trim();
-  const note  = noteInput.value.trim();
-
-  if (name)  lines.push("Ad / Başlık: " + name);
-  if (text)  lines.push("Metin: " + text);
-  if (url)   lines.push("Web: " + url);
-  if (phone) lines.push("Telefon: " + phone);
-  if (insta) lines.push("Instagram: https://instagram.com/" + insta);
-  if (fb)    lines.push("Facebook: " + fb);
-  if (tw)    lines.push("Twitter (X): https://twitter.com/" + tw.replace("@", ""));
-  if (note)  lines.push("Not: " + note);
-
-  return lines.join("\n");
+// Firestore'a kaydedilecek veri
+function getFormData() {
+  return {
+    name:     nameInput.value.trim(),
+    text:     textInput.value.trim(),
+    url:      urlInput.value.trim(),
+    phone:    phoneInput.value.trim(),
+    instagram: instaInput.value.trim(),
+    facebook:  facebookInput.value.trim(),
+    twitter:   twitterInput.value.trim(),
+    note:      noteInput.value.trim(),
+    createdAt: new Date().toISOString()
+  };
 }
 
-// QR OLUŞTUR
-generateBtn.addEventListener("click", () => {
-  const content = buildCardText();
+// Doğrulama
+function isFormEmpty(data) {
+  return (
+    !data.name &&
+    !data.text &&
+    !data.url &&
+    !data.phone &&
+    !data.instagram &&
+    !data.facebook &&
+    !data.twitter &&
+    !data.note
+  );
+}
 
-  if (!content) {
+// QR ÖNİZLEME
+generateBtn.addEventListener("click", async () => {
+  const formData = getFormData();
+
+  if (isFormEmpty(formData)) {
     alert("En az bir alan doldurmalısın.");
     return;
   }
 
-  qrContainer.innerHTML = "";
-  previewText.textContent = content;
+  // Firestore’a kaydet → ID al
+  const id = await saveQRRecord(formData);
 
+  // QR’ın içinde bulunacak URL
+  const qrURL =
+    `https://berkanakahisha.github.io/qr-kod-olusturucum/view.html?id=${id}`;
+
+  // Önizleme yazısı
+  previewText.textContent = qrURL;
+
+  // QR oluştur
+  qrContainer.innerHTML = "";
   const size = Number(sizeInput.value);
-  const colorDark  = colorDarkInput.value;
-  const colorLight = colorLightInput.value;
 
   const qr = new QRCode(qrContainer, {
-    text: content,
+    text: qrURL,
     width: size,
     height: size,
-    colorDark,
-    colorLight,
+    colorDark: colorDarkInput.value,
+    colorLight: colorLightInput.value,
     correctLevel: QRCode.CorrectLevel.H
   });
 
@@ -272,14 +270,17 @@ generateBtn.addEventListener("click", () => {
       saveBtn.disabled = false;
       return;
     }
+
     const canvas = qrContainer.querySelector("canvas");
     if (!canvas) {
       saveBtn.disabled = false;
       return;
     }
+
     const ctx = canvas.getContext("2d");
     const img = new Image();
     img.src = logoDataURL;
+
     img.onload = () => {
       const logoSize = size * 0.25;
       const x = (canvas.width - logoSize) / 2;
@@ -289,39 +290,50 @@ generateBtn.addEventListener("click", () => {
     };
   }, 150);
 });
-
-// FIREBASE'E KAYDET
+// Firebase'e PNG olarak kaydetme (Storage + Firestore)
 saveBtn.addEventListener("click", async () => {
-  const content = previewText.textContent;
-  if (!content) {
+  const canvas = qrContainer.querySelector("canvas");
+  if (!canvas) {
     alert("Önce QR oluştur.");
     return;
   }
-
-  const data = {
-    text: content,
-    size: Number(sizeInput.value),
-    colorDark: colorDarkInput.value,
-    colorLight: colorLightInput.value,
-    hasLogo
-    // note'u ayrıca Firestore'a kaydetmek istersen
-    // firestore.js içinde saveQR'e ek bir alan olarak ekleyebilirsin
-  };
 
   saveBtn.disabled = true;
   saveBtn.textContent = "Kaydediliyor...";
 
   try {
-    await uploadQR(data);
+    // QR'yi base64 PNG olarak al
+    const dataURL = canvas.toDataURL("image/png");
+
+    // Storage dosya yolu
+    const filename = `qr_${Date.now()}.png`;
+    const storageRef = ref(storage, "qrimages/" + filename);
+
+    // Firebase Storage'a yükle
+    await uploadString(storageRef, dataURL, "data_url");
+
+    // URL al
+    const downloadURL = await getDownloadURL(storageRef);
+
+    alert("QR başarıyla kaydedildi!");
+    console.log("Storage URL:", downloadURL);
+
   } catch (err) {
     console.error(err);
-    alert("Kaydederken hata oluştu.");
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = "Firebase'e Kaydet";
+    alert("Kaydetme sırasında bir hata oluştu.");
   }
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = "Firebase'e Kaydet";
 });
 </script>
+
+<style>
+.input {
+  @apply w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2
+         text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500;
+}
+</style>
 
 </body>
 </html>
