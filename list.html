@@ -2,15 +2,17 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>QR Listesi</title>
+  <title>QR Kartvizit Listesi</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
+
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
 
+<!-- HEADER -->
 <header class="border-b border-slate-800">
-  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-    <h1 class="text-xl font-bold tracking-tight">QR Listesi</h1>
+  <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <h1 class="text-xl font-bold tracking-tight">QR Kartvizit Listesi</h1>
     <nav class="space-x-2 text-sm">
       <a href="index.html" class="px-3 py-2 rounded-md hover:bg-slate-800">Dashboard</a>
       <a href="create.html" class="px-3 py-2 rounded-md hover:bg-slate-800">QR Oluştur</a>
@@ -19,77 +21,130 @@
   </div>
 </header>
 
-<main class="flex-1">
-  <div class="max-w-5xl mx-auto px-4 py-8">
-    <h2 class="text-lg font-semibold mb-4">Kaydedilmiş QR Kodlar</h2>
+<main class="flex-1 py-10">
+  <div class="max-w-6xl mx-auto px-4">
 
+    <!-- Boş Liste Ekranı -->
     <div id="emptyState"
-         class="hidden bg-slate-800/60 border border-dashed border-slate-600 rounded-2xl p-8 text-center text-sm text-slate-400">
-      Henüz hiç QR kaydedilmemiş.
+         class="hidden bg-slate-800/40 border border-slate-700 p-8 rounded-2xl text-center text-slate-400">
+      Henüz hiç QR kartvizit oluşturulmamış.
       <a href="create.html" class="text-emerald-400 underline">Hemen bir tane oluştur.</a>
     </div>
 
-    <div id="grid" class="grid md:grid-cols-3 gap-4"></div>
+    <!-- Kart Listesi -->
+    <div id="cardList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6"></div>
+
   </div>
 </main>
 
 <script type="module">
 import { getAllQR, deleteQR } from "./assets/js/firestore.js";
+import { getStorage, ref, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-const grid = document.getElementById("grid");
-const emptyState = document.getElementById("emptyState");
+const listEl = document.getElementById("cardList");
+const emptyEl = document.getElementById("emptyState");
+const storage = getStorage();
 
-async function load() {
-  const list = await getAllQR();
+// Listeyi Yükle
+loadList();
 
-  if (!list.length) {
-    emptyState.classList.remove("hidden");
+async function loadList() {
+  const items = await getAllQR();
+
+  if (!items.length) {
+    emptyEl.classList.remove("hidden");
     return;
   }
 
-  list.forEach((item) => {
-    const card = document.createElement("div");
-    card.className =
-      "bg-slate-800/70 border border-slate-700 rounded-xl p-3 flex flex-col";
-
-    const label = document.createElement("p");
-    label.className =
-      "text-xs text-slate-400 mb-2 line-clamp-2 break-all";
-    label.textContent = item.text;
-    card.appendChild(label);
-
-    const img = document.createElement("img");
-    img.src = item.qr;
-    img.alt = "QR";
-    img.className = "rounded-lg bg-slate-900 mx-auto";
-    card.appendChild(img);
-
-    const meta = document.createElement("div");
-    meta.className =
-      "mt-2 flex items-center justify-between text-[11px] text-slate-400";
-    meta.innerHTML = `
-      <span>${item.size || 256}px</span>
-      <span>${item.hasLogo ? "Logo: Var" : "Logo: Yok"}</span>
-    `;
-    card.appendChild(meta);
-
-    const btn = document.createElement("button");
-    btn.textContent = "Sil";
-    btn.className =
-      "mt-2 w-full text-xs px-3 py-1.5 rounded-md border border-red-500/60 text-red-300 hover:bg-red-500/10";
-    btn.onclick = async () => {
-      if (confirm("Bu QR kaydını silmek istediğine emin misin?")) {
-        await deleteQR(item.id);
-        location.reload();
-      }
-    };
-    card.appendChild(btn);
-
-    grid.appendChild(card);
-  });
+  items.forEach(item => createCard(item));
 }
+/* === Kart Oluşturma Fonksiyonu === */
+async function createCard(item) {
 
-load();
+  // QR görseli Storage'dan alınacak
+  let qrImageURL = "";
+  try {
+    const imageRef = ref(storage, "qrimages/qr_" + item.createdAt + ".png");
+    qrImageURL = await getDownloadURL(imageRef);
+  } catch (err) {
+    // Eğer storage URL bulunamazsa Firestore'a kaydedilmişse onu kullanırız
+    if (item.qrImageURL) qrImageURL = item.qrImageURL;
+  }
+
+  const card = document.createElement("div");
+  card.className =
+    "bg-slate-800/60 border border-slate-700 rounded-xl p-5 space-y-3 hover:border-slate-500 transition";
+
+  /* Ad / Başlık */
+  const title = document.createElement("h3");
+  title.className = "text-lg font-semibold text-emerald-400";
+  title.textContent = item.name || "Ad belirtilmemiş";
+
+  /* QR Görseli */
+  const img = document.createElement("img");
+  img.src = qrImageURL || "https://via.placeholder.com/300x300?text=QR";
+  img.className = "w-full rounded-lg border border-slate-700 bg-slate-900";
+  img.alt = "QR";
+
+  /* Infos */
+  const info = document.createElement("div");
+  info.className = "text-xs text-slate-300 space-y-1";
+
+  if (item.url)
+    info.innerHTML += `<p><b>Web:</b> <span class="break-all">${item.url}</span></p>`;
+
+  if (item.phone)
+    info.innerHTML += `<p><b>Telefon:</b> ${item.phone}</p>`;
+
+  if (item.instagram)
+    info.innerHTML += `<p><b>Instagram:</b> @${item.instagram}</p>`;
+
+  if (item.facebook)
+    info.innerHTML += `<p><b>Facebook:</b> <span class="break-all">${item.facebook}</span></p>`;
+
+  if (item.twitter)
+    info.innerHTML += `<p><b>Twitter (X):</b> @${item.twitter}</p>`;
+
+  if (item.note)
+    info.innerHTML += `<p class="text-slate-400 mt-2 break-all"><b>Not:</b> ${item.note}</p>`;
+
+  /* BUTONLAR */
+  const btnRow = document.createElement("div");
+  btnRow.className = "flex justify-between items-center pt-3";
+
+  // Görüntüle (view.html açar)
+  const viewBtn = document.createElement("a");
+  viewBtn.href =
+    `view.html?id=${item.id}`;
+  viewBtn.target = "_blank";
+  viewBtn.className =
+    "px-3 py-1.5 bg-emerald-500 text-slate-900 rounded-md text-xs font-medium hover:bg-emerald-400";
+  viewBtn.textContent = "Görüntüle";
+
+  // Silme butonu
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "Sil";
+  delBtn.className =
+    "px-3 py-1.5 bg-red-600/70 text-white rounded-md text-xs hover:bg-red-600";
+  delBtn.onclick = async () => {
+    if (confirm("Bu kartı silmek istiyor musun?")) {
+      await deleteQR(item.id);
+      location.reload();
+    }
+  };
+
+  btnRow.appendChild(viewBtn);
+  btnRow.appendChild(delBtn);
+
+  /* Karta ekle */
+  card.appendChild(title);
+  card.appendChild(img);
+  card.appendChild(info);
+  card.appendChild(btnRow);
+
+  listEl.appendChild(card);
+}
 </script>
 
 </body>
