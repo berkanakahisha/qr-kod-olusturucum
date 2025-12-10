@@ -255,14 +255,42 @@ generateBtn.addEventListener("click", async () => {
   qrContainer.innerHTML = "";
   const size = Number(sizeInput.value);
 
+  // QR üret
+setTimeout(() => {
+  // Boşsa tekrar dene
+  qrContainer.innerHTML = "";
+
   const qr = new QRCode(qrContainer, {
-  text: qrURL,
-  width: size,
-  height: size,
-  colorDark: colorDarkInput.value,
-  colorLight: colorLightInput.value,
-  correctLevel: QRCode.CorrectLevel.H
-});
+    text: qrURL,
+    width: size,
+    height: size,
+    colorDark: colorDarkInput.value,
+    colorLight: colorLightInput.value,
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // LOGO
+  setTimeout(() => {
+    if (hasLogo && logoDataURL) {
+      const canvas = qrContainer.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+
+      img.src = logoDataURL;
+      img.onload = () => {
+        const logoSize = size * 0.25;
+        ctx.drawImage(img,
+          (canvas.width - logoSize) / 2,
+          (canvas.height - logoSize) / 2,
+          logoSize,
+          logoSize
+        );
+      };
+    }
+    saveBtn.disabled = false;
+  }, 150);
+}, 50);
+
 
 
   // Logo ekle
