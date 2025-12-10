@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kartvizit Bilgisi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center">
+
+<!-- HEADER -->
+<header class="w-full border-b border-slate-800 py-4">
+  <div class="max-w-xl mx-auto px-4 text-center">
+    <h1 class="text-xl font-bold tracking-tight">Kartvizit Bilgisi</h1>
+  </div>
+</header>
+
+<main class="flex-1 w-full">
+  <div class="max-w-xl mx-auto px-4 py-10">
+
+    <!-- Yükleniyor durumu -->
+    <div id="loading" class="text-center text-slate-400 text-sm">
+      Bilgiler yükleniyor...
+    </div>
+
+    <!-- Kart Alanı -->
+    <div id="card"
+         class="hidden bg-slate-800/60 border border-slate-700 rounded-2xl p-6 space-y-4">
+
+      <h2 id="cardName" class="text-2xl font-bold text-emerald-400"></h2>
+
+      <p id="cardText" class="text-slate-300 whitespace-pre-line"></p>
+
+      <div id="socialSection" class="space-y-3 pt-4 border-t border-slate-700">
+        <h3 class="text-sm font-semibold text-slate-300">İletişim & Sosyal Medya</h3>
+
+        <div id="cardUrl" class="text-slate-300 break-all"></div>
+        <div id="cardPhone" class="text-slate-300"></div>
+        <div id="cardInstagram" class="text-slate-300"></div>
+        <div id="cardFacebook" class="text-slate-300 break-all"></div>
+        <div id="cardTwitter" class="text-slate-300"></div>
+      </div>
+
+      <!-- Not -->
+      <div id="cardNote"
+           class="text-slate-400 text-sm pt-4 border-t border-slate-700"></div>
+
+    </div>
+
+    <!-- Hata Mesajı -->
+    <p id="notFound"
+       class="hidden text-center text-red-400 font-semibold text-sm mt-10">
+       Bu ID'ye ait bir kartvizit bulunamadı.
+    </p>
+
+  </div>
+</main>
+<!-- FIREBASE KÜTÜPHANELERİ -->
+<script type="module">
+import { getQRById } from "./assets/js/firestore.js";
+
+/* === URL'DEN ID AL === */
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+/* HTML ELEMANLARI */
+const loadingEl   = document.getElementById("loading");
+const notFoundEl  = document.getElementById("notFound");
+const cardEl      = document.getElementById("card");
+
+const nameEl      = document.getElementById("cardName");
+const textEl      = document.getElementById("cardText");
+const urlEl       = document.getElementById("cardUrl");
+const phoneEl     = document.getElementById("cardPhone");
+const instaEl     = document.getElementById("cardInstagram");
+const fbEl        = document.getElementById("cardFacebook");
+const twEl        = document.getElementById("cardTwitter");
+const noteEl      = document.getElementById("cardNote");
+
+/* === ID YOKSA HATA === */
+if (!id) {
+  loadingEl.classList.add("hidden");
+  notFoundEl.classList.remove("hidden");
+  console.error("ID bulunamadı!");
+}
+else {
+  loadCard();
+}
+
+/* === FIRESTORE'DAN VERİ ÇEK === */
+async function loadCard() {
+  try {
+    const data = await getQRById(id);
+
+    loadingEl.classList.add("hidden");
+
+    if (!data) {
+      notFoundEl.classList.remove("hidden");
+      return;
+    }
+
+    // Kartı görünür yap
+    cardEl.classList.remove("hidden");
+
+    // Verileri doldur
+    if (data.name)  nameEl.textContent = data.name;
+    else nameEl.textContent = "İsim belirtilmemiş";
+
+    if (data.text)  textEl.textContent = data.text;
+
+    if (data.url) {
+      urlEl.innerHTML = `<b>Web:</b> <a href="${data.url}" class="text-emerald-400" target="_blank">${data.url}</a>`;
+    }
+
+    if (data.phone) {
+      phoneEl.innerHTML = `<b>Telefon:</b> <a href="tel:${data.phone}" class="text-emerald-400">${data.phone}</a>`;
+    }
+
+    if (data.instagram) {
+      instaEl.innerHTML = `<b>Instagram:</b> <a href="https://instagram.com/${data.instagram}" class="text-pink-400" target="_blank">@${data.instagram}</a>`;
+    }
+
+    if (data.facebook) {
+      fbEl.innerHTML = `<b>Facebook:</b> <a href="${data.facebook}" class="text-blue-400" target="_blank">${data.facebook}</a>`;
+    }
+
+    if (data.twitter) {
+      twEl.innerHTML = `<b>Twitter (X):</b> <a href="https://twitter.com/${data.twitter.replace("@","")}" class="text-sky-400" target="_blank">@${data.twitter}</a>`;
+    }
+
+    if (data.note) {
+      noteEl.textContent = data.note;
+    }
+
+  } catch (err) {
+    console.error("Kart yüklenirken hata:", err);
+    loadingEl.classList.add("hidden");
+    notFoundEl.classList.remove("hidden");
+  }
+}
+</script>
+</body>
+</html>
