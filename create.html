@@ -256,13 +256,14 @@ generateBtn.addEventListener("click", async () => {
   const size = Number(sizeInput.value);
 
   const qr = new QRCode(qrContainer, {
-    text: qrURL,
-    width: size,
-    height: size,
-    colorDark: colorDarkInput.value,
-    colorLight: colorLightInput.value,
-    correctLevel: QRCode.CorrectLevel.H
-  });
+  text: qrURL,
+  width: size,
+  height: size,
+  colorDark: colorDarkInput.value,
+  colorLight: colorLightInput.value,
+  correctLevel: QRCode.CorrectLevel.H
+});
+
 
   // Logo ekle
   setTimeout(() => {
